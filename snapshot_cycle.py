@@ -2,7 +2,7 @@
 
 from configparser import ConfigParser
 from os import path
-from subprocess import Popen, PIPE, CalledProcessError, check_output, STDOUT
+from subprocess import Popen, CalledProcessError, PIPE, STDOUT
 import shlex
 
 
@@ -18,11 +18,11 @@ def main():
     # Read in all the settings
     config = ConfigParser()
     config.read(config_file)
-    backup_root = config.get('cycle', 'backup_root')
-    directories = config.get('cycle', 'directories').split()
-    dir_prefix = config.get('cycle', 'dir_prefix')
-    max_backups = config.getint('cycle', 'max_backups')
-    debug = config.getboolean('cycle', 'debug')
+    backup_root = config.get('DEFAULT', 'backup_root')
+    directories = config.get('DEFAULT', 'directories').split()
+    dir_prefix = config.get('DEFAULT', 'dir_prefix')
+    max_backups = config.getint('DEFAULT', 'max_backups')
+    debug = config.getboolean('DEFAULT', 'debug')
 
     # Drop out one from the # of backups
     max_backups -= 1
@@ -72,7 +72,7 @@ def run_cmd(cmd, debug):
 
 def create_ini(config_file):
     config = ConfigParser()
-    config['cycle'] = {
+    config['DEFAULT'] = {
         'backup_root': '/path/to/backups/',
         'directories': 'dir1 dir2 dir3',
         'dir_prefix': 'daily.',

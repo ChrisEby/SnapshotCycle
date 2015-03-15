@@ -14,7 +14,7 @@ Python 3.4+
 Just run it first and it will generate a stock settings file.  From there it will exit and you can set up the settings.ini file with your information.  Then just re-run it and it will do its thing.
 
 ```
-[cycle]
+[DEFAULT]
 backup_root = /path/to/backups/
 directories = dir1 dir2 dir3
 dir_prefix = daily.
