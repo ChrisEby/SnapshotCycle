@@ -2,7 +2,7 @@
 
 from configparser import ConfigParser
 from os import path
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE, CalledProcessError, check_output, STDOUT
 import shlex
 
 
@@ -31,10 +31,15 @@ def main():
         print('Working folder: ' + directory)
 
         directory = backup_root + directory
-
         last_backup = directory + dir_prefix + str('%02d' % max_backups)
+
         print('Removing last backup')
-        run_cmd('rm -R ' + last_backup, debug)
+        try:
+            run_cmd('rm -R ' + last_backup, debug)
+        except CalledProcessError as err:
+            if "No such file or directory" not in str(err.output):
+                raise
+            print("Last backup doesn't exist.  Skipping.")
 
         # Loop through the snapshots and move each backup by one in the chain
         print('Moving target folders')
@@ -42,7 +47,12 @@ def main():
             src_index = x - 1
             dest = directory + dir_prefix + ('%02d' % x)
             src = directory + dir_prefix + ('%02d' % src_index)
-            run_cmd('mv ' + src + ' ' + dest, debug)
+            try:
+                run_cmd('mv ' + src + ' ' + dest, debug)
+            except CalledProcessError as err:
+                if "No such file or directory" not in str(err.output):
+                    raise
+                print("Cannot move directories... source doesn't exist.")
 
         print('Hard linking first snapshot to current snapshot')
         run_cmd('cp -al ' + directory + dir_prefix + '01 ' + directory + dir_prefix + '00', debug)
@@ -52,13 +62,12 @@ def run_cmd(cmd, debug):
     if debug:
         print(cmd)
         return
-
-    process = Popen(shlex.split(cmd), stdout=PIPE)
+    process = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT)
     dump_output = process.communicate()[0]
     exit_code = process.wait()
     if exit_code != 0:
         print(dump_output)
-        raise Exception(str(exit_code) + ' - Error executing command.  Please review output.')
+        raise CalledProcessError(exit_code, cmd, dump_output)
 
 
 def create_ini(config_file):
