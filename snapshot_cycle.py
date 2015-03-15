@@ -30,7 +30,7 @@ def main():
     for directory in directories:
         print('Working folder: ' + directory)
 
-        directory = backup_root + directory
+        directory = backup_root + directory + '/'
         last_backup = directory + dir_prefix + str('%02d' % max_backups)
 
         print('Removing last backup')
